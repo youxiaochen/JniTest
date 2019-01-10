@@ -130,7 +130,7 @@ extern "C"{
         return  (env)->NewStringUTF(hex_sha);
     }
 
-    /*
+    /* JNI动态注册方法名
     * JNI函数混淆去掉Java_包名_方法名的写法, 如  Java_you_jnitest_JniTest_createBean方法名注册为crb, 方法参数不能变
     * 方法数组中第一参数为需要混淆的方法 如 createBean, 第二个为方法参数与返回值JNI的写法, 第三个即为混淆时注册的方法名,对应上面的方法
     */
