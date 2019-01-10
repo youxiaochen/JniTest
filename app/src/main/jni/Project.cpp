@@ -2,8 +2,6 @@
 #include <assert.h>
 #include<android/log.h>
 
-#define JNIREG_CLASS "you/jnitest/JniTest"//指定要注册的类
-
 // 这个是自定义的LOG的标识
 #define TAG    "jniLog"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
@@ -130,7 +128,7 @@ extern "C"{
         return  (env)->NewStringUTF(hex_sha);
     }
 
-    /* JNI动态注册方法名
+    /* 通过JNI动态注册代替静态注册
     * JNI函数混淆去掉Java_包名_方法名的写法, 如  Java_you_jnitest_JniTest_createBean方法名注册为crb, 方法参数不能变
     * 方法数组中第一参数为需要混淆的方法 如 createBean, 第二个为方法参数与返回值JNI的写法, 第三个即为混淆时注册的方法名,对应上面的方法
     */
@@ -140,25 +138,12 @@ extern "C"{
     };
 
     /*
-    * Register several native methods for one class.
-    */
-    int registerNativeMethods(JNIEnv* env, const char* className, JNINativeMethod* gMethods, int numMethods) {
-        jclass clazz = (env)->FindClass(className);
-        if (clazz == NULL) {
-            return JNI_FALSE;
-        }
-        if ((env)->RegisterNatives(clazz, gMethods, numMethods) < 0) {
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
-    }
-
-    /*
     * Register native methods for all classes we know about.
     */
-    int registerNatives(JNIEnv* env) {
-        if (!registerNativeMethods(env, JNIREG_CLASS, gMethods, sizeof(gMethods) / sizeof(gMethods[0])))
+    int registerNatives(JNIEnv* env, jclass clazz) {
+        if ((env)->RegisterNatives(clazz, gMethods, sizeof(gMethods) / sizeof(gMethods[0])) < 0) {
             return JNI_FALSE;
+        }
         return JNI_TRUE;
     }
 
@@ -169,8 +154,10 @@ extern "C"{
             return -1;
         }
         assert(env != NULL);
-
-        if (!registerNatives(env)) {//注册
+        //需要注册的类
+        jclass jniTestClass = env->FindClass("you/jnitest/JniTest");
+        assert(jniTestClass != NULL);
+        if (!registerNatives(env, jniTestClass)) {//注册
             return -1;
         }
         contextClass = (jclass)env->NewGlobalRef((env)->FindClass("android/content/Context"));
