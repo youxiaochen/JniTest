@@ -125,6 +125,7 @@ extern "C"{
             hex_sha[2*i+1] = hc[((unsigned char)sha1[i])%16];
         }
         hex_sha[array_size * 2]='\0';
+        env->ReleaseByteArrayElements(sha1_byte, sha1, 0);
         return  (env)->NewStringUTF(hex_sha);
     }
 
